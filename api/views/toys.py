@@ -22,3 +22,8 @@ def create():
 def index():
   toys = Toy.query.all()
   return jsonify([toy.serialize() for toy in toys]), 201
+
+@toys.route('/<id>', methods=["GET"])
+def show(id):
+  toy = Toy.query.filter_by(id=id).first()
+  return jsonify(toy.serialize()), 200
