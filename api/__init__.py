@@ -12,6 +12,8 @@ from api.models.cat import Cat
 # ============ Import Views ============
 from api.views.auth import auth
 from api.views.cats import cats
+from api.models.toy import Toy
+
 
 # Creates a new instances of CORS 
 cors = CORS()
