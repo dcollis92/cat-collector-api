@@ -3,6 +3,7 @@ from api.middleware import login_required, read_token
 
 from api.models.db import db
 from api.models.cat import Cat
+from api.models.feeding import Feeding
 
 cats = Blueprint('cats', 'cats')
 
