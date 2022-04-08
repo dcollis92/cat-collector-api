@@ -47,3 +47,18 @@ def update(id):
 
   db.session.commit()
   return jsonify(toy.serialize()), 200
+
+
+# Delete Toy
+@toys.route('/<id>', methods=["DELETE"]) 
+@login_required
+def delete(id):
+  profile = read_token(request)
+  toy = Toy.query.filter_by(id=id).first()
+
+  if toy.profile_id != profile["id"]:
+    return 'Forbidden', 403
+    
+  db.session.delete(toy)
+  db.session.commit()
+  return jsonify(message="Success"), 200
