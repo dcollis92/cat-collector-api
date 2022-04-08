@@ -6,6 +6,7 @@ from api.models.cat import Cat
 
 cats = Blueprint('cats', 'cats')
 
+# Create Cats
 @cats.route('/', methods=["POST"])
 @login_required
 def create():
@@ -17,17 +18,20 @@ def create():
   db.session.commit()
   return jsonify(cat.serialize()), 201
 
+# Index Cats
 @cats.route('/', methods=["GET"])
 def index():
   cats = Cat.query.all()
   return jsonify([cat.serialize() for cat in cats]), 200
 
+# Show Cat
 @cats.route('/<id>', methods=["GET"])
 def show(id):
   cat = Cat.query.filter_by(id=id).first()
   cat_data = cat.serialize()
   return jsonify(cat=cat_data), 200
 
+# Update Cat
 @cats.route('/<id>', methods=["PUT"]) 
 @login_required
 def update(id):
@@ -44,6 +48,7 @@ def update(id):
   db.session.commit()
   return jsonify(cat.serialize()), 200
 
+# Delete Cat
 @cats.route('/<id>', methods=["DELETE"]) 
 @login_required
 def delete(id):
