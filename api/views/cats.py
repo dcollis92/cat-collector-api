@@ -112,3 +112,7 @@ def assoc_toy(cat_id, toy_id):
 
   cat = Cat.query.filter_by(id=cat_id).first()
   return jsonify(cat.serialize()), 201  
+
+@cats.errorhandler(Exception)          
+def basic_error(err):
+  return jsonify(err=str(err)), 500
