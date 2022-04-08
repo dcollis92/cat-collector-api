@@ -43,3 +43,16 @@ def update(id):
 
   db.session.commit()
   return jsonify(cat.serialize()), 200
+
+@cats.route('/<id>', methods=["DELETE"]) 
+@login_required
+def delete(id):
+  profile = read_token(request)
+  cat = Cat.query.filter_by(id=id).first()
+
+  if cat.profile_id != profile["id"]:
+    return 'Forbidden', 403
+
+  db.session.delete(cat)
+  db.session.commit()
+  return jsonify(message="Success"), 200  
