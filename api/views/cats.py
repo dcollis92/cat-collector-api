@@ -4,6 +4,8 @@ from api.middleware import login_required, read_token
 from api.models.db import db
 from api.models.cat import Cat
 from api.models.feeding import Feeding
+from api.models.toy import Toy
+from api.models.toy import Association
 
 cats = Blueprint('cats', 'cats')
 
@@ -30,10 +32,13 @@ def index():
 def show(id):
   cat = Cat.query.filter_by(id=id).first()
   cat_data = cat.serialize()
-
-  # Add to add Feeding info:
   cat_data["fed"] = cat.fed_for_today()
-  return jsonify(cat=cat_data), 200
+
+  # Add the following (re: Toy association):
+  toys = Toy.query.filter(Toy.id.notin_([toy.id for toy in cat.toys])).all()
+  toys=[toy.serialize() for toy in toys]
+
+  return jsonify(cat=cat_data, available_toys=toys), 200
 
 # Update Cat
 @cats.route('/<id>', methods=["PUT"]) 
@@ -88,3 +93,22 @@ def add_feeding(id):
   cat_data["fed"] = cat.fed_for_today()
 
   return jsonify(cat_data), 201
+
+# Associate Toy
+@cats.route('/<cat_id>/toys/<toy_id>', methods=["LINK"]) 
+@login_required
+def assoc_toy(cat_id, toy_id):
+  data = { "cat_id": cat_id, "toy_id": toy_id }
+
+  profile = read_token(request)
+  cat = Cat.query.filter_by(id=cat_id).first()
+  
+  if cat.profile_id != profile["id"]:
+    return 'Forbidden', 403
+
+  assoc = Association(**data)
+  db.session.add(assoc)
+  db.session.commit()
+
+  cat = Cat.query.filter_by(id=cat_id).first()
+  return jsonify(cat.serialize()), 201  
