@@ -30,6 +30,9 @@ def index():
 def show(id):
   cat = Cat.query.filter_by(id=id).first()
   cat_data = cat.serialize()
+
+  # Add to add Feeding info:
+  cat_data["fed"] = cat.fed_for_today()
   return jsonify(cat=cat_data), 200
 
 # Update Cat
@@ -62,3 +65,26 @@ def delete(id):
   db.session.delete(cat)
   db.session.commit()
   return jsonify(message="Success"), 200  
+
+# Add a Feeding
+@cats.route('/<id>/feedings', methods=["POST"]) 
+@login_required
+def add_feeding(id):
+  data = request.get_json()
+  data["cat_id"] = id
+
+  profile = read_token(request)
+  cat = Cat.query.filter_by(id=id).first()
+
+  if cat.profile_id != profile["id"]:
+    return 'Forbidden', 403
+
+  feeding = Feeding(**data)
+  
+  db.session.add(feeding)
+  db.session.commit()
+
+  cat_data = cat.serialize()
+  cat_data["fed"] = cat.fed_for_today()
+
+  return jsonify(cat_data), 201
